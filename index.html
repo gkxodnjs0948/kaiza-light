@@ -11,7 +11,6 @@
         body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; color: #1e293b; overflow-x: hidden; }
         .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); }
         
-        /* 차트 컨테이너 최적화 */
         .chart-container {
             position: relative;
             width: 100%;
@@ -28,7 +27,6 @@
             z-index: 10;
         }
         
-        /* 슬라이더 커스텀 */
         input[type=range] {
             -webkit-appearance: none;
             width: 100%;
@@ -56,7 +54,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
         .modal-bg { background-color: rgba(15, 23, 42, 0.85); }
-        #bannerFileInput { display: none; }
+        .file-input-hidden { display: none; }
 
         /* 신규 스펙 강조 (부드러운 시안 배경) */
         .new-spec-row { background-color: #f0fdff !important; }
@@ -75,47 +73,64 @@
 </head>
 <body class="antialiased selection:bg-cyan-500 selection:text-white">
 
-    <!-- 이미지 업로드 버튼 (미리보기 및 로컬 확인용) -->
+    <!-- 이미지 업로드 버튼 (미리보기 용도) -->
     <div class="fixed top-6 right-6 z-50">
-        <button onclick="toggleImageModal()" class="bg-white/90 backdrop-blur-md border border-slate-200 p-3 rounded-2xl shadow-lg hover:bg-white transition-all group flex items-center">
+        <button onclick="toggleImageModal()" class="bg-white/90 backdrop-blur-md border border-slate-200 p-3 rounded-2xl shadow-xl hover:bg-white transition-all group flex items-center">
             <span class="text-xl group-hover:rotate-12 transition-transform inline-block">📸</span>
-            <span class="ml-2 text-sm font-bold text-slate-700">배너 설정</span>
+            <span class="ml-2 text-sm font-bold text-slate-700 font-bold">이미지 설정</span>
         </button>
     </div>
 
     <!-- 업로드 모달 -->
     <div id="imageModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-6 modal-bg backdrop-blur-sm">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 fade-in text-slate-900">
-            <h3 class="text-xl font-black mb-2 text-center text-slate-900">헤더 이미지 등록</h3>
-            <p class="text-slate-500 text-sm mb-8 leading-relaxed text-center">배너 이미지를 선택하시면 리포트에 반영됩니다.</p>
-            <div class="space-y-6">
-                <div class="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-3xl p-10 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer" onclick="document.getElementById('bannerFileInput').click()">
-                    <div class="text-4xl mb-4 text-cyan-500">🖼️</div>
-                    <span class="text-sm font-bold text-slate-600 tracking-tight">파일 탐색기 열기</span>
-                    <p id="fileName" class="text-xs text-slate-400 mt-2 italic font-mono">선택된 파일 없음</p>
-                    <input type="file" id="bannerFileInput" accept="image/*" onchange="handleFileSelect(this)">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 fade-in text-slate-900 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-xl font-black mb-2 text-center text-slate-900 font-black text-slate-900">이미지 설정 센터</h3>
+            <p class="text-slate-500 text-sm mb-8 leading-relaxed text-center">각 영역에 표시될 이미지를 업로드해 주세요.</p>
+            
+            <div class="space-y-8">
+                <!-- 메인 배너 업로드 -->
+                <div class="space-y-3 text-slate-900">
+                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest">1. 메인 배너 (상단)</p>
+                    <div class="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-3xl p-6 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer" onclick="document.getElementById('mainFileInput').click()">
+                        <div class="text-3xl mb-2 text-cyan-500">🖼️</div>
+                        <span class="text-xs font-bold text-slate-600">메인 배너 파일 선택</span>
+                        <p id="mainFileName" class="text-[10px] text-slate-400 mt-1 italic font-mono">선택된 파일 없음</p>
+                        <input type="file" id="mainFileInput" class="file-input-hidden" accept="image/*" onchange="handleFileSelect(this, 'main')">
+                    </div>
                 </div>
-                <div class="flex gap-3">
-                    <button onclick="toggleImageModal()" class="flex-1 py-4 text-sm font-bold text-slate-400">취소</button>
-                    <button onclick="applyUploadedImage()" class="flex-1 py-4 bg-cyan-500 text-white rounded-xl text-sm font-black shadow-lg shadow-cyan-500/30">반영하기</button>
+
+                <!-- 서브 배너 업로드 -->
+                <div class="space-y-3 text-slate-900">
+                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest">2. 서브 배너 (제원표 위)</p>
+                    <div class="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-3xl p-6 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer" onclick="document.getElementById('subFileInput').click()">
+                        <div class="text-3xl mb-2 text-cyan-600">📑</div>
+                        <span class="text-xs font-bold text-slate-600">서브 배너 파일 선택 (.png)</span>
+                        <p id="subFileName" class="text-[10px] text-slate-400 mt-1 italic font-mono">선택된 파일 없음</p>
+                        <input type="file" id="subFileInput" class="file-input-hidden" accept="image/*" onchange="handleFileSelect(this, 'sub')">
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-4 border-t border-slate-100 text-slate-900">
+                    <button onclick="toggleImageModal()" class="flex-1 py-4 text-sm font-bold text-slate-400">닫기</button>
+                    <button onclick="applyUploadedImages()" class="flex-1 py-4 bg-cyan-500 text-white rounded-xl text-sm font-black shadow-lg shadow-cyan-500/30 text-white font-black">전체 반영하기</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 헤더 영역 (16:9 고정) -->
+    <!-- 헤더 영역 (메인 배너) -->
     <header class="bg-[#f8fafc] py-6 px-4 sm:px-12 lg:px-24">
         <div class="max-w-7xl mx-auto">
-            <div id="bannerContainer" class="w-full aspect-video rounded-3xl shadow-2xl overflow-hidden border border-slate-200 bg-slate-900 flex items-center justify-center relative group">
+            <div id="mainBannerContainer" class="w-full aspect-video rounded-3xl shadow-2xl overflow-hidden border border-slate-200 bg-slate-900 flex items-center justify-center relative">
                 <img id="mainBanner" src="카이자라이트_메인 배너.jpg" 
                      alt="요넥스 카이자라이트 메인 배너" 
                      class="w-full h-full object-cover"
-                     onerror="this.style.display='none'; document.getElementById('noImage').style.display='flex';">
+                     onerror="this.style.display='none'; document.getElementById('noMainImage').style.display='flex';">
                 
-                <div id="noImage" class="hidden flex-col items-center justify-center text-white p-12 text-center">
-                    <div class="text-5xl mb-4">⛳</div>
-                    <h2 class="text-2xl font-black italic tracking-tighter uppercase">REXIS KAIZA-LIGHT</h2>
-                    <p class="text-slate-400 text-sm max-w-sm">배너 이미지를 등록해 주세요.</p>
+                <div id="noMainImage" class="hidden flex-col items-center justify-center text-white p-12 text-center text-white">
+                    <div class="text-5xl mb-4 text-white">⛳</div>
+                    <h2 class="text-2xl font-black italic tracking-tighter uppercase font-black text-white">REXIS KAIZA-LIGHT</h2>
+                    <p class="text-slate-400 text-sm max-w-sm">메인 배너 이미지를 등록해 주세요.</p>
                 </div>
             </div>
         </div>
@@ -125,45 +140,61 @@
 
         <!-- PRODUCT SPEC 요약 -->
         <section class="fade-in text-slate-800">
-            <div class="text-center max-w-4xl mx-auto">
-                <h2 class="text-2xl md:text-4xl font-black mb-10 tracking-tight uppercase">PRODUCT SPEC</h2>
+            <div class="text-center max-w-4xl mx-auto text-slate-800">
+                <h2 class="text-2xl md:text-4xl font-black mb-10 tracking-tight uppercase font-black">PRODUCT SPEC</h2>
                 <div class="flex flex-col gap-6">
-                    <div class="bg-white px-8 py-6 rounded-3xl shadow-sm border border-slate-200 inline-block mx-auto">
-                        <p class="text-cyan-600 font-black text-xs uppercase mb-3 tracking-widest">핵심 기술 소재</p>
-                        <p class="font-bold text-lg md:text-xl italic leading-relaxed text-slate-800">
+                    <div class="bg-white px-8 py-6 rounded-3xl shadow-sm border border-slate-200 inline-block mx-auto text-slate-800">
+                        <p class="text-cyan-600 font-black text-xs uppercase mb-3 tracking-widest text-cyan-600 font-black text-cyan-600">핵심 기술 소재</p>
+                        <p class="font-bold text-lg md:text-xl italic leading-relaxed text-slate-800 font-bold">
                             2G-Namd Flex Force + 초박형 멀티레이어드 그라파이트 + 나노메트릭 DR 복합
                         </p>
                     </div>
-                    <div class="flex flex-wrap items-center justify-center gap-4">
+                    <div class="flex flex-wrap items-center justify-center gap-4 text-slate-800">
                         <div class="bg-white px-6 py-4 rounded-2xl shadow-sm border border-slate-200">
-                            <span class="text-cyan-600 font-black text-xs mr-3">생산국</span> 
-                            <span class="font-black text-slate-900">Made in Japan</span>
+                            <span class="text-cyan-600 font-black text-xs mr-3 text-cyan-600 font-bold text-cyan-600">생산국</span> 
+                            <span class="font-black text-slate-900 font-bold">Made in Japan</span>
                         </div>
                         <div class="bg-white px-6 py-4 rounded-2xl shadow-sm border border-slate-200">
-                            <span class="text-cyan-600 font-black text-xs mr-3">킥포인트</span> 
-                            <span class="font-black text-slate-900 text-base md:text-lg">Middle Kick</span>
+                            <span class="text-cyan-600 font-black text-xs mr-3 text-cyan-600 font-bold text-cyan-600">킥포인트</span> 
+                            <span class="font-black text-slate-900 text-base md:text-lg font-bold">Middle Kick</span>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 카이자라이트 스펙 제원표 (글자 크기 2pt 키움) -->
+        <!-- 서브 배너 영역 (Product Spec과 제원표 사이, PNG 대응) -->
         <section class="fade-in">
-            <div class="mb-8 border-l-8 border-cyan-500 pl-6">
-                <h2 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">카이자라이트 스펙 제원</h2>
+            <div id="subBannerContainer" class="w-full rounded-3xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center relative min-h-[200px]">
+                <!-- PNG 파일을 로드할 수 있도록 src를 수정했습니다 -->
+                <img id="subBanner" src="카이자라이트_서브 배너.png" 
+                     alt="카이자라이트 상세 정보" 
+                     class="w-full h-auto object-contain"
+                     onerror="this.style.display='none'; document.getElementById('noSubImage').style.display='flex';">
+                
+                <div id="noSubImage" class="hidden flex-col items-center justify-center text-slate-300 p-12 text-center">
+                    <div class="text-4xl mb-3">🖼️</div>
+                    <p class="text-sm font-bold tracking-tight">상세 정보를 담은 서브 배너(.png)를 업로드해 주세요.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 카이자라이트 스펙 제원표 (글자 크기 2pt 키움) -->
+        <section class="fade-in text-slate-900">
+            <div class="mb-8 border-l-8 border-cyan-500 pl-6 text-slate-900">
+                <h2 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight font-black text-slate-900">카이자라이트 스펙 제원</h2>
             </div>
             
             <div class="overflow-x-auto rounded-3xl shadow-sm border border-slate-200 bg-white">
-                <table class="w-full text-left border-collapse min-w-[700px]">
+                <table class="w-full text-left border-collapse min-w-[700px] text-slate-900">
                     <thead>
-                        <tr class="bg-slate-50 text-slate-500 text-sm uppercase border-b border-slate-100">
-                            <th class="p-6 font-black">FLEX</th>
-                            <th class="p-6 font-black text-center">길이[mm]</th>
-                            <th class="p-6 font-black text-center">중량</th>
+                        <tr class="bg-slate-50 text-slate-500 text-sm uppercase border-b border-slate-100 text-slate-500 font-black">
+                            <th class="p-6 font-black text-slate-900">FLEX</th>
+                            <th class="p-6 font-black text-center text-slate-900">길이[mm]</th>
+                            <th class="p-6 font-black text-center text-slate-900">중량</th>
                             <th class="p-6 font-black text-center text-slate-500">토크(º)</th>
-                            <th class="p-6 font-black text-center">진동수(CPM)</th>
-                            <th class="p-6 font-black text-center">추천속도(mph)</th>
+                            <th class="p-6 font-black text-center text-slate-900">진동수(CPM)</th>
+                            <th class="p-6 font-black text-center text-slate-900">추천속도(mph)</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody" class="text-slate-800">
@@ -177,9 +208,9 @@
         </section>
 
         <!-- 추천 대상 카테고리 -->
-        <section class="fade-in">
-            <div class="mb-8 border-l-8 border-cyan-500 pl-6">
-                <h2 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">스펙별 추천 대상</h2>
+        <section class="fade-in text-slate-900">
+            <div class="mb-8 border-l-8 border-cyan-500 pl-6 text-slate-900">
+                <h2 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight font-black text-slate-900 text-slate-900">스펙별 추천 대상</h2>
             </div>
             <div id="targetGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- JS populated -->
@@ -187,43 +218,43 @@
         </section>
 
         <!-- 스펙 파인더 -->
-        <section id="spec-finder" class="bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
+        <section id="spec-finder" class="bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden text-slate-900">
             <div class="p-10 md:p-14 border-b border-slate-100 gradient-bg text-white">
-                <h2 class="text-3xl font-black mb-3">스펙 파인더</h2>
-                <p class="text-cyan-100 text-base opacity-90">나의 스피드에 가장 최적화된 샤프트를 추천합니다.</p>
+                <h2 class="text-3xl font-black mb-3 font-black text-white">스펙 파인더</h2>
+                <p class="text-cyan-100 text-base opacity-90 text-white font-bold text-white">나의 스피드에 가장 최적화된 샤프트를 추천합니다.</p>
             </div>
             
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-0">
                 <div class="lg:col-span-5 p-10 md:p-14 bg-slate-50 border-r border-slate-200 flex flex-col justify-center">
-                    <label class="block text-xs font-black text-slate-400 uppercase mb-8 tracking-widest">나의 스윙 스피드 설정 (mph)</label>
+                    <label class="block text-xs font-black text-slate-400 uppercase mb-8 tracking-widest text-slate-400 font-black">나의 스윙 스피드 설정 (mph)</label>
                     <div class="flex items-center justify-between mb-6">
-                        <span class="text-slate-400 font-black text-sm uppercase">Slow</span>
-                        <span id="speedDisplay" class="text-6xl font-black text-cyan-600 tracking-tighter">95</span>
-                        <span class="text-slate-400 font-black text-sm uppercase">Fast</span>
+                        <span class="text-slate-400 font-black text-sm uppercase font-black text-slate-400 text-slate-400">Slow</span>
+                        <span id="speedDisplay" class="text-6xl font-black text-cyan-600 tracking-tighter text-cyan-600 font-black text-cyan-600">95</span>
+                        <span class="text-slate-400 font-black text-sm uppercase font-black text-slate-400 text-slate-400">Fast</span>
                     </div>
                     <input type="range" id="speedSlider" min="70" max="110" step="5" value="95" class="mb-12 w-full">
                     
                     <div id="recommendationCard" class="bg-white rounded-3xl p-10 shadow-xl shadow-cyan-500/10 border border-cyan-100 fade-in text-slate-800">
-                        <div class="text-xs font-black text-cyan-500 mb-3 tracking-widest uppercase">Best Performance</div>
-                        <div id="recTitle" class="text-5xl font-black text-slate-900 mb-5">4S</div>
-                        <div id="recTarget" class="text-lg font-bold text-slate-600 leading-snug mb-10">여성 투어 프로 & 레슨 프로, 3040 남성 골퍼</div>
-                        <div class="grid grid-cols-2 gap-10 text-sm border-t border-slate-100 pt-8">
+                        <div class="text-xs font-black text-cyan-500 mb-3 tracking-widest uppercase text-cyan-500 font-black text-cyan-500">Best Performance</div>
+                        <div id="recTitle" class="text-5xl font-black text-slate-900 mb-5 text-slate-900 font-black text-slate-900 text-slate-900">4S</div>
+                        <div id="recTarget" class="text-lg font-bold text-slate-600 leading-snug mb-10 text-slate-600 font-bold text-slate-600">여성 투어 프로 & 레슨 프로, 3040 남성 골퍼</div>
+                        <div class="grid grid-cols-2 gap-10 text-sm border-t border-slate-100 pt-8 text-slate-800">
                             <div>
-                                <span class="block text-slate-400 text-xs font-black uppercase mb-2 tracking-tighter">Weight (g)</span>
-                                <span id="recWeight" class="font-black text-slate-900 text-3xl tracking-tighter">44(*42)</span>
+                                <span class="block text-slate-400 text-xs font-black uppercase mb-2 tracking-tighter text-slate-400 font-black text-slate-400 text-slate-400">Weight (g)</span>
+                                <span id="recWeight" class="font-black text-slate-900 text-3xl tracking-tighter font-black text-slate-900">44(*42)</span>
                             </div>
                             <div>
-                                <span class="block text-slate-400 text-xs font-black uppercase mb-2 tracking-tighter">CPM</span>
-                                <span id="recCpm" class="font-black text-slate-900 text-3xl tracking-tighter">255</span>
+                                <span class="block text-slate-400 text-xs font-black uppercase mb-2 tracking-tighter text-slate-400 font-black text-slate-400 text-slate-400">CPM</span>
+                                <span id="recCpm" class="font-black text-slate-900 text-3xl tracking-tighter font-black text-slate-900 text-slate-900">255</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 
                 <div class="lg:col-span-7 p-10 md:p-14 w-full relative min-h-[450px]">
-                    <h3 class="text-xl font-black text-slate-900 mb-10 tracking-tight">스펙 포지셔닝 맵</h3>
+                    <h3 class="text-xl font-black text-slate-900 mb-10 tracking-tight font-black text-slate-900 text-slate-900">스펙 포지셔닝 맵</h3>
                     <div class="chart-container">
-                        <div class="y-axis-label-horizontal">진동수(CPM)</div>
+                        <div class="y-axis-label-horizontal text-slate-400 font-bold text-slate-400">진동수(CPM)</div>
                         <canvas id="specChart"></canvas>
                     </div>
                 </div>
@@ -245,31 +276,47 @@
         const speedSlider = document.getElementById('speedSlider');
         const speedDisplay = document.getElementById('speedDisplay');
         const imageModal = document.getElementById('imageModal');
+        
         const mainBanner = document.getElementById('mainBanner');
-        const noImage = document.getElementById('noImage');
-        const fileNameLabel = document.getElementById('fileName');
+        const noMainImage = document.getElementById('noMainImage');
+        const mainFileName = document.getElementById('mainFileName');
+        
+        const subBanner = document.getElementById('subBanner');
+        const noSubImage = document.getElementById('noSubImage');
+        const subFileName = document.getElementById('subFileName');
 
         let currentChart = null;
         let highlightedFlex = '4S';
-        let pendingImageData = null;
+        let pendingMainData = null;
+        let pendingSubData = null;
 
         function toggleImageModal() { imageModal.classList.toggle('hidden'); }
 
-        function handleFileSelect(input) {
+        function handleFileSelect(input, type) {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
-                fileNameLabel.innerText = file.name;
+                if(type === 'main') mainFileName.innerText = file.name;
+                else subFileName.innerText = file.name;
+                
                 const reader = new FileReader();
-                reader.onload = function(e) { pendingImageData = e.target.result; };
+                reader.onload = function(e) {
+                    if(type === 'main') pendingMainData = e.target.result;
+                    else pendingSubData = e.target.result;
+                };
                 reader.readAsDataURL(file);
             }
         }
 
-        function applyUploadedImage() {
-            if (pendingImageData) {
-                mainBanner.src = pendingImageData;
+        function applyUploadedImages() {
+            if (pendingMainData) {
+                mainBanner.src = pendingMainData;
                 mainBanner.style.display = 'block';
-                noImage.style.display = 'none';
+                noMainImage.style.display = 'none';
+            }
+            if (pendingSubData) {
+                subBanner.src = pendingSubData;
+                subBanner.style.display = 'block';
+                noSubImage.style.display = 'none';
             }
             toggleImageModal();
         }
@@ -285,11 +332,11 @@
                 
                 tr.innerHTML = `
                     <td class="p-6 font-black text-slate-900 table-text-xl">${item.flex}</td>
-                    <td class="p-6 text-slate-400 font-mono table-text-lg text-center">1,168</td>
-                    <td class="p-6 font-black text-cyan-600 text-center table-text-lg">${item.weightRaw}(*${item.weight})</td>
-                    <td class="p-6 text-slate-500 font-bold text-center table-text-lg">${item.torque}</td>
-                    <td class="p-6 font-black text-slate-800 text-center table-text-xl">${item.cpm}</td>
-                    <td class="p-6 text-slate-600 font-black text-center table-text-lg italic">${speedText}</td>
+                    <td class="p-6 text-slate-400 font-mono table-text-lg text-center font-bold">1,168</td>
+                    <td class="p-6 font-black text-cyan-600 text-center table-text-lg font-bold">${item.weightRaw}(*${item.weight})</td>
+                    <td class="p-6 text-slate-500 font-bold text-center table-text-lg font-bold">${item.torque}</td>
+                    <td class="p-6 font-black text-slate-800 text-center table-text-xl font-bold">${item.cpm}</td>
+                    <td class="p-6 text-slate-600 font-black text-center table-text-lg italic font-bold">${speedText}</td>
                 `;
                 tr.onclick = () => {
                     speedSlider.value = item.speedMin;
@@ -307,14 +354,13 @@
                 const card = document.createElement('div');
                 const bgClass = item.isNew ? 'bg-cyan-50 border-cyan-200 ring-2 ring-cyan-100' : 'bg-white border-slate-200';
                 card.className = `spec-card ${bgClass} p-8 rounded-[32px] flex flex-col gap-4`;
-                
                 card.innerHTML = `
                     <div class="flex items-center justify-between">
-                        <span class="text-3xl font-black text-slate-900">${item.flex}</span>
-                        ${item.isNew ? '<span class="text-[10px] font-black bg-cyan-500 text-white px-3 py-1 rounded-full uppercase tracking-tighter">NEW</span>' : ''}
+                        <span class="text-3xl font-black text-slate-900 font-black text-slate-900">${item.flex}</span>
+                        ${item.isNew ? '<span class="text-[10px] font-black bg-cyan-500 text-white px-3 py-1 rounded-full uppercase tracking-tighter font-black">NEW</span>' : ''}
                     </div>
-                    <div class="h-1 bg-slate-200/40 w-12 rounded-full"></div>
-                    <p class="text-lg font-bold text-slate-700 leading-snug">
+                    <div class="h-1 bg-slate-200/40 w-12 rounded-full text-slate-900 text-slate-900"></div>
+                    <p class="text-lg font-bold text-slate-700 leading-snug font-bold text-slate-700">
                         ${item.target}
                     </p>
                 `;
@@ -384,7 +430,6 @@
                 }
             });
         }
-
         speedSlider.addEventListener('input', (e) => updateRecommendation(parseInt(e.target.value)));
         window.onload = () => { initTable(); initTargetGrid(); initChart(); updateRecommendation(parseInt(speedSlider.value)); };
     </script>
